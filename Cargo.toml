@@ -1,0 +1,8 @@
+[package]
+name = "ipfs_hash"
+version = "0.1.0"
+authors = ["Sami Mäkelä <mrsmkl@gmail.com>"]
+
+[dependencies]
+quick-protobuf = "0.6.0"
+multihash = "*"
