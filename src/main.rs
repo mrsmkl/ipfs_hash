@@ -78,18 +78,26 @@ fn read_file(filename : &str) -> Vec<u8> {
 
 use quick_protobuf::{MessageRead, BytesReader};
 
-fn process_block(dta : &Vec<u8>) {
+fn process_block(fname : &str) -> Vec<u8> {
+    let dta = read_file(fname);
     let mut reader = BytesReader::from_bytes(&dta);
     let nd = proto::ipfs::PBNode::from_reader(&mut reader, &dta).expect("Cannot read node");
     println!("Perhaps it will work {:?}", nd);
+    let mut res = Vec::new();
     for l in nd.Links {
-       println!("Got link {:?}", base58::ToBase58::to_base58(l.Hash.unwrap().to_mut().as_slice()))
+       let name = base58::ToBase58::to_base58(l.Hash.unwrap().to_mut().as_slice());
+       println!("Got link {:?}", name);
+       res.append(&mut process_block(&name))
+    };
+    if let Some(mut data) = nd.Data {
+        res.append(data.to_mut());
     }
+    res
 }
 
 fn main() {
-    let dta = read_file("ipfsblock");
-    process_block(&dta);
+    let dta = process_block("ipfsblock");
+    println!("Got {:?} bytes", dta.len());
     // use proto::ipfs::PBNode::*;
     let crump : &[u8] = "asassasasa".as_bytes();
     let hash = encode(Hash::SHA2256, &crump.to_vec()).unwrap();
